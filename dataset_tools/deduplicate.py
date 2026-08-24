@@ -85,7 +85,7 @@ def find_duplicates(
 
 def check_cross_split_leakage(
     splits: Dict[str, List[Path | str]],
-    hamming_threshold: int = 3,
+    hamming_threshold: int = 1,
 ) -> Dict[str, Any]:
     """Checks for exact and near duplicate image leakage across train, val, and test splits."""
     split_dhashes: Dict[str, Dict[str, str]] = {}
