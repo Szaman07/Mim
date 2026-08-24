@@ -1,0 +1,397 @@
+<!doctype html>
+<!--
+  Design philosophy: Field Manual Ledger — a calm, editorial technical notebook.
+  Warm paper, slate ink, monospace metadata, thin rules, and asymmetric document
+  layout communicate evidence and operating detail without marketing theatrics.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A project guide and roadmap for Proctoring-CV, a reproducible zero-cost webcam computer-vision system." />
+  <title>Proctoring-CV — Project Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* Field Manual Ledger: restrained editorial documentation, not a marketing landing page. */
+    :root {
+      --paper: #fbfbfa;
+      --ink: #1a1a2e;
+      --slate: #1e293b;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --panel: #f1f5f9;
+      --blue: #3b82f6;
+      --blue-soft: #eff6ff;
+      --code: #0f172a;
+      --max: 1180px;
+      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --sans: "Inter", Arial, sans-serif;
+      --serif: "Lora", Charter, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.75;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    code, pre { font-family: var(--mono); }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 62px;
+      padding: 0 4vw;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 94%, transparent);
+      backdrop-filter: blur(10px);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; white-space: nowrap; }
+    .brand svg { width: 27px; height: 18px; }
+    .topnav { display: flex; align-items: center; gap: 22px; }
+    .topnav a { color: var(--muted); transition: color 160ms ease; }
+    .topnav a:hover { color: var(--blue); }
+
+    main { max-width: var(--max); margin: 0 auto; padding: 0 30px 96px; }
+    .intro { padding: 104px 0 82px; border-bottom: 1px solid var(--line); }
+    .eyebrow, .section-kicker {
+      margin: 0 0 20px;
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, h4 { margin: 0; font-family: var(--sans); color: var(--ink); line-height: 1.13; }
+    h1 { max-width: 780px; font-size: clamp(2.55rem, 6vw, 5.4rem); letter-spacing: -.07em; }
+    h2 { max-width: 760px; font-size: clamp(2rem, 3.7vw, 3.3rem); letter-spacing: -.055em; }
+    h3 { font-size: 1.05rem; letter-spacing: -.015em; }
+    .lede { max-width: 820px; margin: 28px 0 0; font-size: clamp(1rem, 1.5vw, 1.19rem); color: #334155; }
+    .lede strong { color: var(--slate); font-weight: 600; }
+
+    .statbar {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0;
+      margin-top: 52px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+    .stat { min-height: 96px; padding: 16px 14px 15px 0; border-right: 1px solid var(--line); }
+    .stat:not(:first-child) { padding-left: 15px; }
+    .stat:last-child { border-right: 0; }
+    .stat-value { display: block; font-family: var(--sans); font-size: 1.85rem; font-weight: 700; letter-spacing: -.06em; }
+    .stat-label { display: block; margin-top: 5px; color: var(--muted); font-family: var(--mono); font-size: 9px; line-height: 1.45; letter-spacing: .08em; text-transform: uppercase; }
+
+    section { padding: 82px 0; border-bottom: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 32px; margin-bottom: 42px; }
+    .section-head .section-kicker { padding-top: 7px; }
+    .section-note { max-width: 660px; margin: 18px 0 0; color: var(--muted); }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 18px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(241,245,249,.55), rgba(251,251,250,.55));
+    }
+    .arch-origin, .arch-core, .arch-event { min-width: 0; }
+    .arch-node {
+      position: relative;
+      padding: 16px 17px;
+      border: 1px solid #cbd5e1;
+      background: var(--paper);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .arch-node strong { display: block; margin-bottom: 3px; color: var(--slate); font-family: var(--sans); font-size: 13px; }
+    .arch-origin { display: grid; align-content: center; }
+    .arch-origin .arch-node::after { content: ""; position: absolute; top: 50%; right: -19px; width: 19px; border-top: 1px solid #94a3b8; }
+    .arch-core { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .arch-core > .arch-node { min-height: 154px; }
+    .arch-list { display: grid; gap: 8px; margin-top: 13px; color: #475569; font-size: 10px; }
+    .arch-list span { display: block; padding-left: 13px; border-left: 2px solid var(--blue); }
+    .arch-event { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 220px; gap: 18px; align-items: center; margin-top: 4px; }
+    .arch-event .arch-node { border-color: var(--slate); }
+    .event-log { padding: 16px; border-left: 3px solid var(--blue); background: var(--blue-soft); color: var(--slate); font-family: var(--mono); font-size: 11px; line-height: 1.5; }
+
+    .callout {
+      display: grid;
+      grid-template-columns: 25px 1fr;
+      gap: 14px;
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--slate);
+      background: var(--panel);
+      color: #334155;
+      font-size: .94rem;
+    }
+    .callout svg { width: 18px; margin-top: 4px; }
+    .callout code { padding: 1px 4px; background: #e2e8f0; color: var(--slate); font-size: .83em; }
+
+    .phase-stack { display: grid; gap: 0; border-top: 1px solid var(--ink); }
+    .phase {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) 226px;
+      gap: 24px;
+      padding: 25px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .phase-id { color: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+    .status { display: inline-flex; align-items: center; gap: 7px; color: #166534; font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
+    .status::before { width: 12px; height: 12px; border: 1px solid currentColor; content: "✓"; display: inline-grid; place-items: center; font-size: 10px; line-height: 1; }
+    .status.pending { color: var(--muted); }
+    .status.pending::before { content: ""; }
+    .phase p { margin: 8px 0 0; color: #475569; font-size: .93rem; line-height: 1.65; }
+    .file-list { align-self: start; padding-top: 3px; color: var(--muted); font-family: var(--mono); font-size: 10px; line-height: 1.65; }
+    .file-list code { color: var(--slate); font-size: inherit; }
+
+    .data-table-wrap { overflow-x: auto; border-top: 1px solid var(--ink); }
+    table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    th { padding: 12px 15px; text-align: left; color: var(--muted); border-bottom: 1px solid #cbd5e1; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+    td { padding: 17px 15px; vertical-align: top; border-bottom: 1px solid var(--line); color: #475569; font-size: .91rem; line-height: 1.58; }
+    td:first-child { width: 64px; color: var(--slate); font-family: var(--mono); font-size: 11px; }
+    td:nth-child(2) { min-width: 180px; color: var(--slate); font-family: var(--sans); font-weight: 600; }
+    tr { transition: background-color 160ms ease; }
+    tbody tr:hover { background: rgba(241,245,249,.6); }
+
+    .guide-list { display: grid; gap: 8px; }
+    details { border-top: 1px solid var(--line); }
+    details:last-child { border-bottom: 1px solid var(--line); }
+    summary { position: relative; display: flex; align-items: center; gap: 16px; padding: 19px 38px 19px 0; cursor: pointer; list-style: none; font-family: var(--sans); font-size: 1rem; font-weight: 600; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { position: absolute; right: 3px; top: 20px; color: var(--blue); content: "+"; font-family: var(--mono); font-size: 21px; font-weight: 400; transition: transform 160ms ease; }
+    details[open] summary::after { transform: rotate(45deg); }
+    .guide-number { flex: 0 0 auto; color: var(--blue); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+    .guide-content { padding: 0 0 26px; max-width: 900px; color: var(--muted); }
+    .guide-content p { margin: 0 0 13px; }
+    pre { overflow-x: auto; margin: 0; padding: 17px 19px; background: var(--code); color: #e2e8f0; border-left: 3px solid var(--blue); font-size: 12px; line-height: 1.68; }
+    .code-note { margin-top: 11px !important; font-size: .86rem; }
+
+    .state-diagram { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 28px; align-items: center; padding: 26px 0 24px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+    .state { position: relative; padding: 17px 14px; border: 1px solid #cbd5e1; background: var(--paper); text-align: center; font-family: var(--mono); font-size: 12px; font-weight: 500; }
+    .state:not(:last-child)::after { position: absolute; top: 50%; right: -27px; width: 26px; border-top: 1px solid #94a3b8; content: ""; }
+    .state:not(:last-child)::before { position: absolute; z-index: 2; top: calc(50% - 4px); right: -28px; width: 7px; height: 7px; border-top: 1px solid #94a3b8; border-right: 1px solid #94a3b8; content: ""; transform: rotate(45deg); }
+    .state.active { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+    .state-note { margin-top: 14px; color: var(--muted); font-family: var(--mono); font-size: 10px; text-align: center; }
+    .event-table { margin-top: 26px; }
+
+    .repo-map { margin: 0; padding: 24px; overflow-x: auto; border: 1px solid var(--line); background: #f8fafc; color: #334155; font-size: 12px; line-height: 1.75; }
+    .repo-map b { color: var(--slate); font-weight: 600; }
+    footer { display: grid; grid-template-columns: 1fr auto; gap: 24px; padding: 28px 0 12px; color: var(--muted); font-family: var(--mono); font-size: 10px; line-height: 1.75; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+    .footer-links a:hover { color: var(--blue); }
+
+    @media (max-width: 820px) {
+      main { padding: 0 20px 64px; }
+      .topbar { padding: 0 20px; }
+      .intro { padding: 72px 0 60px; }
+      .statbar { grid-template-columns: repeat(3, 1fr); }
+      .stat:nth-child(3n) { border-right: 0; }
+      .stat:nth-child(n+4) { border-top: 1px solid var(--line); }
+      .section-head { grid-template-columns: 1fr; gap: 9px; margin-bottom: 30px; }
+      .section-head .section-kicker { padding: 0; }
+      .architecture { grid-template-columns: 1fr; }
+      .arch-origin .arch-node::after { display: none; }
+      .arch-core { grid-template-columns: 1fr; }
+      .arch-event { grid-template-columns: 1fr; }
+      .phase { grid-template-columns: 80px 1fr; gap: 15px; }
+      .file-list { grid-column: 2; }
+      .state-diagram { grid-template-columns: 1fr; gap: 15px; }
+      .state:not(:last-child)::after { top: auto; right: auto; bottom: -16px; left: 50%; width: 0; height: 16px; border-top: 0; border-left: 1px solid #94a3b8; }
+      .state:not(:last-child)::before { top: auto; right: auto; bottom: -17px; left: calc(50% - 4px); transform: rotate(135deg); }
+      footer { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 470px) {
+      .topnav { gap: 13px; font-size: 10px; }
+      .brand { font-size: 10px; }
+      h1 { font-size: 2.42rem; }
+      .statbar { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(3n) { border-right: 1px solid var(--line); }
+      .stat:nth-child(2n) { border-right: 0; }
+      .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+      .phase { grid-template-columns: 1fr; gap: 7px; }
+      .file-list { grid-column: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="Proctoring CV project overview">
+      <svg viewBox="0 0 54 36" aria-hidden="true" fill="none">
+        <path d="M2 18C8.7 8.7 16.9 4 27 4s18.3 4.7 25 14c-6.7 9.3-14.9 14-25 14S8.7 27.3 2 18Z" stroke="#1e293b" stroke-width="3"/>
+        <circle cx="27" cy="18" r="5" fill="#3b82f6"/>
+      </svg>
+      PROCTORING · CV
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="https://github.com/Szaman07/Mim" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="#next">What’s Next</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" id="overview">
+      <p class="eyebrow">Project overview</p>
+      <h1>Zero-Cost Reproducible Webcam Proctoring System</h1>
+      <p class="lede">Proctoring-CV is an open-source computer vision system that monitors webcam video during online exams and reports three observable visual events: <strong>phone visible in frame</strong>, <strong>multiple people in frame</strong>, and <strong>head turned away from screen</strong>. It does not claim to detect cheating — it records timestamped visual observations with confidence scores and uncertainty diagnostics. The primary detector (YOLO11n) is trained entirely from scratch with no pretrained weights.</p>
+      <div class="statbar" aria-label="Project statistics">
+        <div class="stat"><span class="stat-value">75</span><span class="stat-label">Source Files</span></div>
+        <div class="stat"><span class="stat-value">41</span><span class="stat-label">Passing Tests</span></div>
+        <div class="stat"><span class="stat-value">10</span><span class="stat-label">Completed Phases</span></div>
+        <div class="stat"><span class="stat-value">3</span><span class="stat-label">Observable Events</span></div>
+        <div class="stat"><span class="stat-value">2</span><span class="stat-label">Target Classes</span></div>
+        <div class="stat"><span class="stat-value">$0</span><span class="stat-label">Cloud API Cost</span></div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="section-head">
+        <p class="section-kicker">How it works</p>
+        <div><h2>One visual pipeline, three bounded observations.</h2><p class="section-note">The runtime separates general object detection, geometric head-pose estimation, and timestamp-driven event logic so that each result remains inspectable.</p></div>
+      </div>
+      <div class="architecture" aria-label="System architecture flow diagram">
+        <div class="arch-origin"><div class="arch-node"><strong>Webcam Frame</strong>Timestamped image input</div></div>
+        <div class="arch-core">
+          <div class="arch-node"><strong>YOLO11n Detector</strong><span>person + cellphone</span><div class="arch-list"><span>person count → MULTIPLE_PERSONS candidate</span><span>phone detection → PHONE_DETECTED candidate</span><span>primary person box → pose branch</span></div></div>
+          <div class="arch-node"><strong>Face Landmarks</strong><span>primary person crop</span><div class="arch-list"><span>solvePnP head pose</span><span>calibration + smoothing</span><span>LOOKING_AWAY candidate</span></div></div>
+          <div class="arch-event"><div class="arch-node"><strong>Event Engine</strong>Four-state FSM converts persistent, confidence-gated candidates into bounded observable events.</div><div class="event-log">EVENT LOG +<br/>DJANGO API<br/><span style="color:#3b82f6">timestamped · structured</span></div></div>
+        </div>
+      </div>
+      <aside class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><div>The system never outputs <code>CHEATING</code>, <code>SUSPICIOUS_PERSON</code>, emotion, intent, identity, or audio analysis. When evidence is missing, it reports <code>POSE_UNAVAILABLE</code> or <code>LOW_CONFIDENCE</code> instead of guessing.</div></aside>
+    </section>
+
+    <section id="completed">
+      <div class="section-head">
+        <p class="section-kicker">Completed work</p>
+        <div><h2>10 implementation phases are done.</h2><p class="section-note">The current repository contains the core research tooling, tests, inference integration, and documentation needed to begin measured model work.</p></div>
+      </div>
+      <div class="phase-stack">
+        <article class="phase"><div class="phase-id">Phase 01<br/><span class="status">Complete</span></div><div><h3>Repository &amp; Environment Layer</h3><p>Core Python package with config loader (YAML + env overrides + SHA-256 hashing), hardware diagnostics probe, reproducibility seeding, and structured JSONL logging.</p></div><div class="file-list"><code>config.py</code> · <code>environment.py</code><br/><code>reproducibility.py</code> · <code>logging_utils.py</code><br/><code>schemas.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 02<br/><span class="status">Complete</span></div><div><h3>Dataset Tooling</h3><p>COCO and Open Images annotation converters (→ YOLO format), cross-split duplicate detection (SHA-256 + perceptual dHash), immutable manifests, and automated download support.</p></div><div class="file-list"><code>coco_to_yolo.py</code> · <code>openimages_filter.py</code><br/><code>deduplicate.py</code> · <code>manifest.py</code><br/><code>download_dataset.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 03<br/><span class="status">Complete</span></div><div><h3>Primary Detector</h3><p>YOLO11n loaded strictly from YAML (<code>pretrained=False</code>). An automated guard rejects <code>.pt</code> weights in scratch mode, parameter hashes vary across random seeds, and detections normalize into standard schemas.</p></div><div class="file-list"><code>detector.py</code><br/><code>tiny_overfit.py</code> · <code>train.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 04<br/><span class="status">Complete</span></div><div><h3>Checkpoint Manager &amp; Drive Sync</h3><p>Atomic checkpoint writes (tempfile → rename), SHA-256 integrity verification, periodic rotation, Google Drive folder synchronization, and exact-resume versus branching workflows.</p></div><div class="file-list"><code>checkpoint_manager.py</code><br/><code>drive_sync.py</code><br/><code>resume_training.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 05<br/><span class="status">Complete</span></div><div><h3>Evaluation &amp; Error Slicing</h3><p>Precision, recall, F1, mAP50, mAP50-95, and latency/FPS benchmarking. Temporal event metrics cover onset delay, duration bias, and interval IoU alongside size and context slices.</p></div><div class="file-list"><code>metrics.py</code> · <code>event_metrics.py</code><br/><code>error_slices.py</code><br/><code>evaluate.py</code> · <code>benchmark.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 06<br/><span class="status">Complete</span></div><div><h3>Head Pose &amp; Looking-Away</h3><p>3D–2D facial geometry via OpenCV <code>solvePnP</code>, 30-frame frontal calibration, median + EMA smoothing, hysteresis thresholds, and explicit <code>POSE_UNAVAILABLE</code> output when the face is missing.</p></div><div class="file-list"><code>looking_away.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 07<br/><span class="status">Complete</span></div><div><h3>Event Engine &amp; Replay</h3><p>Deterministic timestamp-driven finite state machine: <code>INACTIVE → CANDIDATE → ACTIVE → ENDING</code>. Persistence, short-gap merging, cooldowns, and offline replay provide reproducible testing.</p></div><div class="file-list"><code>event_engine.py</code><br/><code>run_event_replay.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 08<br/><span class="status">Complete</span></div><div><h3>Webcam Inference</h3><p>Live webcam runner with primary-person tracking, real-time event evaluation, privacy-safe HUD overlay, and structured JSONL session logging.</p></div><div class="file-list"><code>infer_webcam.py</code></div></article>
+        <article class="phase"><div class="phase-id">Phase 09<br/><span class="status">Complete</span></div><div><h3>Test Suite</h3><p>Automated pytest coverage spans configuration, conversion and validation, random initialization verification, checkpoint atomicity, resume compatibility, event logic, head-pose geometry, and forbidden output rejection.</p></div><div class="file-list"><code>tests/test_*.py</code><br/>9 test modules</div></article>
+        <article class="phase"><div class="phase-id">Phase 10<br/><span class="status">Complete</span></div><div><h3>Django Integration &amp; Documentation</h3><p>Production-ready Django integration: ORM models, a thread-safe service singleton, Django Channels WebSocket consumer, REST endpoints, browser client, four Jupyter notebooks, and full documentation.</p></div><div class="file-list"><code>examples/django_integration/</code><br/><code>notebooks/</code> · <code>docs/</code><br/><code>README.md</code></div></article>
+      </div>
+    </section>
+
+    <section id="next">
+      <div class="section-head"><p class="section-kicker">What’s next</p><div><h2>6 milestones remain before the system is production-ready.</h2><p class="section-note">These are operational next steps, not claims of completed model performance.</p></div></div>
+      <div class="data-table-wrap"><table><thead><tr><th>#</th><th>Milestone</th><th>What it involves</th><th>Estimated effort</th></tr></thead><tbody>
+        <tr><td><span class="status pending" aria-label="Not started">M1</span></td><td>Train on Real COCO Data</td><td>Download filtered COCO 2017, run the tiny-overfit preflight gate, then launch full scratch training on a Colab T4 GPU for approximately 50 epochs.</td><td>4–8 hours<br/>Colab GPU time</td></tr>
+        <tr><td><span class="status pending" aria-label="Not started">M2</span></td><td>Run Experiment Comparisons</td><td>Train the YOLOv8n scratch baseline (E03) and optionally YOLO26n/P2 (E04). Compare per-class metrics under identical conditions.</td><td>8–12 hours</td></tr>
+        <tr><td><span class="status pending" aria-label="Not started">M3</span></td><td>Tune Event Thresholds</td><td>Sweep confidence, persistence, hysteresis, and cooldown on validation scenario data (E08). Select an operating point by the measured precision/recall trade-off.</td><td>2–3 hours</td></tr>
+        <tr><td><span class="status pending" aria-label="Not started">M4</span></td><td>Locked Final Evaluation</td><td>Run the selected checkpoint once on the held-out test set (E09). Report detector and event metrics, error slices, and limitations. Do not re-tune afterward.</td><td>1–2 hours</td></tr>
+        <tr><td><span class="status pending" aria-label="Not started">M5</span></td><td>Deploy Django Application</td><td>Integrate the trained <code>best.pt</code> checkpoint into Django; configure an ASGI server, database, and channel layer; test the end-to-end student-to-proctor WebSocket flow.</td><td>1–2 days</td></tr>
+        <tr><td><span class="status pending" aria-label="Not started">M6</span></td><td>Collect Webcam Test Scenarios</td><td>Record consented clips covering normal work, phones, a second person, head turns, lighting changes, and partial occlusion; label with the locked scenario protocol.</td><td>1–2 days</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="guides">
+      <div class="section-head"><p class="section-kicker">Step-by-step guides</p><div><h2>How to execute each milestone.</h2><p class="section-note">Each guide is collapsed by default. Expand only the procedure you need.</p></div></div>
+      <div class="guide-list">
+        <details><summary><span class="guide-number">GUIDE 01</span>How to Set Up the Environment</summary><div class="guide-content"><p>Clone the project, install the package in editable mode, and run the complete test suite before changing any implementation code.</p><pre><code>git clone https://github.com/Szaman07/Mim.git
+cd Mim
+pip install -e .
+python -m pytest tests/ -v   # Should show: 41 passed</code></pre></div></details>
+        <details><summary><span class="guide-number">GUIDE 02</span>How to Get the Dataset</summary><div class="guide-content"><p>Begin with the synthetic dataset to validate the local path and schema. Download the filtered real data only after the local workflow passes.</p><pre><code># Quick synthetic dev dataset (instant, for testing)
+python scripts/download_dataset.py --source sample --output data/datasets/coco2017_filtered_v1
+
+# Real filtered COCO 2017 (downloads ~1GB)
+python scripts/download_dataset.py --source coco_val2017 --output data/datasets/coco2017_filtered_v1
+
+# Validate dataset integrity
+python scripts/validate_dataset.py --root data/datasets/coco2017_filtered_v1</code></pre></div></details>
+        <details><summary><span class="guide-number">GUIDE 03</span>How to Train on Google Colab</summary><div class="guide-content"><p>Mount Drive before training. The runtime is disposable; Drive stores the experiment configuration, checkpoints, logs, and metrics.</p><pre><code># 1. Mount Drive
+from google.colab import drive
+drive.mount('/content/drive')
+
+# 2. Clone and install
+!git clone https://github.com/Szaman07/Mim.git /content/Mim
+%cd /content/Mim
+!pip install -e .
+
+# 3. Preflight gate (must show decreasing loss)
+!python scripts/tiny_overfit.py --config configs/experiments/yolo11n_scratch_coco.yaml --epochs 5 --device 0
+
+# 4. Full training
+!python scripts/train.py \
+    --config configs/experiments/yolo11n_scratch_coco.yaml \
+    --experiment-id yolo11n_scratch_coco_v1_seed42 \
+    --drive-root /content/drive/MyDrive/proctoring_cv \
+    --mode full</code></pre></div></details>
+        <details><summary><span class="guide-number">GUIDE 04</span>How to Resume After Colab Disconnects</summary><div class="guide-content"><p>Use exact resume only when returning to the same experiment and unchanged configuration. Use a new branch when changing data, architecture, or hyperparameters.</p><pre><code>python scripts/resume_training.py \
+    --experiment-dir /content/drive/MyDrive/proctoring_cv/experiments/yolo11n_scratch_coco_v1_seed42 \
+    --checkpoint last.pt \
+    --resume</code></pre></div></details>
+        <details><summary><span class="guide-number">GUIDE 05</span>How to Evaluate a Trained Checkpoint</summary><div class="guide-content"><p>Evaluate on validation data while selecting configurations. Preserve the locked test set for the final one-shot result.</p><pre><code>python scripts/evaluate.py \
+    --checkpoint experiments/yolo11n_scratch_coco_v1_seed42/checkpoints/best.pt \
+    --split val</code></pre></div></details>
+        <details><summary><span class="guide-number">GUIDE 06</span>How to Deploy the Django App</summary><div class="guide-content"><p>After a checkpoint has been selected, integrate the documented Django example into an existing Django project and configure deployment infrastructure separately.</p><pre><code>pip install django channels daphne
+pip install -e /path/to/Mim
+
+# Copy examples/django_integration/ files into your Django app
+# Configure settings.py with ASGI_APPLICATION and CHANNEL_LAYERS
+# Place best.pt in weights/ directory
+
+python manage.py makemigrations
+python manage.py migrate
+python -m daphne -p 8000 myproject.asgi:application</code></pre></div></details>
+      </div>
+    </section>
+
+    <section id="events">
+      <div class="section-head"><p class="section-kicker">Event engine</p><div><h2>State is earned through time, not inferred from one frame.</h2><p class="section-note">Each observable event must persist long enough to become active and must recover long enough to end.</p></div></div>
+      <div class="state-diagram" aria-label="Event engine state diagram"><div class="state">INACTIVE<div class="state-note">condition met</div></div><div class="state">CANDIDATE<div class="state-note">persistence met</div></div><div class="state active">ACTIVE<div class="state-note">condition lost</div></div><div class="state">ENDING<div class="state-note">timeout → inactive</div></div></div>
+      <div class="data-table-wrap event-table"><table><thead><tr><th>Event</th><th>Start persistence</th><th>End persistence</th><th>Gap merge</th></tr></thead><tbody><tr><td><code>PHONE_DETECTED</code></td><td>0.5 s</td><td>0.75 s</td><td>0.5 s</td></tr><tr><td><code>MULTIPLE_PERSONS</code></td><td>0.75 s</td><td>1.0 s</td><td>0.5 s</td></tr><tr><td><code>LOOKING_AWAY</code></td><td>1.5 s (≥70% valid pose)</td><td>0.75 s</td><td>0.5 s</td></tr></tbody></table></div>
+    </section>
+
+    <section id="repository">
+      <div class="section-head"><p class="section-kicker">Repository structure</p><div><h2>A compact map of the working system.</h2><p class="section-note">The codebase separates core runtime behavior from data preparation, evaluation, integration examples, and research documentation.</p></div></div>
+      <pre class="repo-map"><code><b>proctoring-cv/</b>
+├── <b>src/proctoring_cv/</b>               # Core library (detector, pose, events, config)
+├── <b>scripts/</b>                         # CLI tools (train, evaluate, download, replay)
+├── <b>dataset_tools/</b>                   # COCO/OpenImages converters, deduplication
+├── <b>evaluation/</b>                      # Metrics, event metrics, error slices
+├── <b>examples/django_integration/</b>     # Django models, views, WebSocket consumer
+├── <b>notebooks/</b>                       # 4 Jupyter notebooks (smoke test → evaluation)
+├── <b>configs/</b>                         # YAML configs for data, runtime, experiments
+├── <b>tests/</b>                           # 41 automated tests (9 modules)
+├── <b>docs/</b>                            # Architecture, training guide, Django guide
+└── <b>README.md</b></code></pre>
+    </section>
+
+    <footer>
+      <div class="footer-links"><a href="https://github.com/Szaman07/Mim" target="_blank" rel="noreferrer">GitHub · Szaman07/Mim</a><span>License · MIT</span></div>
+      <div>Built with Python, PyTorch, Ultralytics, OpenCV, and Django.</div>
+    </footer>
+  </main>
+</body>
+</html>
