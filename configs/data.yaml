@@ -1,0 +1,14 @@
+# Data Configuration for Proctoring CV
+dataset:
+  name: coco2017_filtered_v1
+  root: data/datasets/coco2017_filtered_v1
+  train_manifest: data/manifests/train_manifest.json
+  val_manifest: data/manifests/val_manifest.json
+  test_manifest: data/manifests/test_manifest.json
+  source_dataset_version: v1
+  nc: 2
+  names:
+    0: person
+    1: cellphone
+
+manifest_sha256: null

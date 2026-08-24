@@ -1,0 +1,75 @@
+# Comparison Scratch Experiment: YOLOv8n on Filtered COCO 2-Class
+experiment_id: yolov8n_scratch_coco_v1_seed42
+drive_root: /content/drive/MyDrive/proctoring_cv
+local_scratch_dir: /content/scratch
+
+dataset:
+  name: coco2017_filtered_v1
+  root: data/datasets/coco2017_filtered_v1
+  train_manifest: data/manifests/train_manifest.json
+  val_manifest: data/manifests/val_manifest.json
+  test_manifest: data/manifests/test_manifest.json
+  source_dataset_version: v1
+  nc: 2
+  names:
+    0: person
+    1: cellphone
+
+model:
+  architecture: yolov8n.yaml
+  initialization_method: random_from_yaml
+  pretrained: false
+  model_type: yolov8n
+  num_classes: 2
+
+training:
+  epochs: 50
+  time_limit_hours: 10.0
+  imgsz: 640
+  batch_size: 16
+  optimizer: AdamW
+  lr0: 0.001
+  lrf: 0.01
+  weight_decay: 0.0005
+  seed: 42
+  deterministic: true
+  amp: true
+  workers: 2
+  checkpoint_interval: 5
+  keep_periodic_checkpoints: 3
+  patience: 15
+  device: "0"
+  augmentation:
+    hsv_h: 0.015
+    hsv_s: 0.7
+    hsv_v: 0.4
+    degrees: 0.0
+    translate: 0.1
+    scale: 0.5
+    shear: 0.0
+    perspective: 0.0
+    flipud: 0.0
+    fliplr: 0.5
+    mosaic: 1.0
+    mixup: 0.0
+
+looking_away:
+  yaw_threshold_deg: 25.0
+  pitch_threshold_deg: 20.0
+  hysteresis_deg: 15.0
+  calibration_frames: 30
+  smoothing_ema_alpha: 0.3
+  smoothing_median_window: 5
+  min_valid_pose_ratio: 0.70
+
+event_engine:
+  phone_confidence_threshold: 0.35
+  person_confidence_threshold: 0.40
+  phone_start_persistence_sec: 0.5
+  phone_end_persistence_sec: 0.75
+  multi_person_start_persistence_sec: 0.75
+  multi_person_end_persistence_sec: 1.0
+  looking_away_start_persistence_sec: 1.5
+  looking_away_end_persistence_sec: 0.75
+  gap_merge_tolerance_sec: 0.5
+  event_cooldown_sec: 2.0

@@ -1,0 +1,35 @@
+# Runtime Configuration for Webcam Inference and Event Replay
+experiment_id: runtime_session
+drive_root: drive_root
+local_scratch_dir: scratch
+
+runtime:
+  detector_checkpoint: null
+  webcam_index: 0
+  confidence_threshold: 0.35
+  iou_threshold: 0.45
+  target_fps: 30.0
+  show_overlay: true
+  save_raw_frames: false
+  log_file: logs/events.jsonl
+
+looking_away:
+  yaw_threshold_deg: 25.0
+  pitch_threshold_deg: 20.0
+  hysteresis_deg: 15.0
+  calibration_frames: 30
+  smoothing_ema_alpha: 0.3
+  smoothing_median_window: 5
+  min_valid_pose_ratio: 0.70
+
+event_engine:
+  phone_confidence_threshold: 0.35
+  person_confidence_threshold: 0.40
+  phone_start_persistence_sec: 0.5
+  phone_end_persistence_sec: 0.75
+  multi_person_start_persistence_sec: 0.75
+  multi_person_end_persistence_sec: 1.0
+  looking_away_start_persistence_sec: 1.5
+  looking_away_end_persistence_sec: 0.75
+  gap_merge_tolerance_sec: 0.5
+  event_cooldown_sec: 2.0
